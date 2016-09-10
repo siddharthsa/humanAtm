@@ -64,6 +64,8 @@ public class HumanAtmAPI {
     @Path("/getAllFulfillers")
     @Produces(MediaType.APPLICATION_JSON)
     public FulfillerMetaData getAllFulfillers(UserIdPOJO user) {
+
+        //TODO - make array
         return Utils.getAllFulfillersMetaOfPayment(db, user);
     }
 
