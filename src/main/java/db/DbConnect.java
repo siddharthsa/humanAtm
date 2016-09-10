@@ -84,7 +84,7 @@ public class DbConnect {
             return -1;
         }
 
-        String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + "order by created_on desc";
+        String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + " order by created_on desc";
         int userId = -1;
         try {
             PreparedStatement statement1 = getConnection().prepareStatement(userIdSQL);
@@ -195,7 +195,7 @@ public class DbConnect {
 
     public FulfillerMetaData getFulfillerMeta(UserIdPOJO user) {
         //Get id of this payment_requests
-        String lastRequestQuery = "select fulfilled_by from payment_requests where requester_id = " + user.getUserId() + "order by requested_time desc limit 1";
+        String lastRequestQuery = "select fulfilled_by from payment_requests where requester_id = " + user.getUserId() + " order by requested_time desc limit 1";
         PreparedStatement statement1 = null;
         try {
             statement1 = getConnection().prepareStatement(lastRequestQuery);

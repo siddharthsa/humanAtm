@@ -1,1 +1,9 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 16080
+  adminConnectors:
+  - type: http
+    port: 16081
+
 host: localhost
