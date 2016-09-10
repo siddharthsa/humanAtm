@@ -1,5 +1,6 @@
 package POJO;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -17,5 +18,6 @@ public class User {
     private String email;
     private String password;
     private String gcmId;
+    @JsonIgnore
     private String upi;
 }
