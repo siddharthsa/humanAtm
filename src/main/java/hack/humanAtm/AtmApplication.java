@@ -1,22 +1,24 @@
 package hack.humanAtm;
 
-import com.hubspot.dropwizard.guice.GuiceBundle;
+import db.DbConnect;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 public class AtmApplication extends Application<AtmConfiguration> {
-    private GuiceBundle<AtmConfiguration> guiceBundle;
+
+    private static DbConnect db;
+
     @Override
     public void initialize(Bootstrap bootstrap) {
-        
     }
 
 
     @Override
     public void run(AtmConfiguration atmConfiguration, Environment environment) throws Exception {
-        environment.jersey().register(HumanAtmResource.class);
+        db = new DbConnect(atmConfiguration.getHost());
+        HumanAtmAPI api = new HumanAtmAPI(db);
+        environment.jersey().register(api);
     }
 
     public static void main(String[] args) throws Exception {
