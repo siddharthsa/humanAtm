@@ -232,8 +232,8 @@ public class DbConnect {
             while (rs1.next()) {
 
                 ffmd = new FulfillerMetaData(rs1.getInt("id"),
-                        rs1.getString("name"),
-                        100,
+                        rs1.getString("username"),
+                        0,
                         rs1.getDouble("lat"),
                         rs1.getDouble("lon"));
             }
