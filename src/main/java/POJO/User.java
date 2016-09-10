@@ -15,6 +15,7 @@ public class User {
 
     private String username;
     private String phoneNumber;
+    @JsonIgnore
     private String email;
     private String password;
     private String gcmId;

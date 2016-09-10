@@ -16,7 +16,7 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class Utils {
-    public static boolean registerUser(DbConnect db, User user) {
+    public static int registerUser(DbConnect db, User user) {
         return db.writeNewUserToDB(user);
     }
 

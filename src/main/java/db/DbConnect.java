@@ -53,7 +53,7 @@ public class DbConnect {
     }
 
 
-    public boolean writeNewUserToDB(User user) {
+    public int writeNewUserToDB(User user) {
         String insertSQL = "insert into Users (username,phonenumber,email,password,gcmId,status,lat,lon) values ('"
                 + user.getUsername()
                 + "',"
@@ -80,10 +80,26 @@ public class DbConnect {
         }
 
 
-        if (result == 1) {
-            return true;
+        if (result != 1) {
+            return -1;
         }
-        return false;
+
+        String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + "order by created_on desc";
+
+        try {
+            PreparedStatement statement1 = getConnection().prepareStatement(userIdSQL);
+            ResultSet rs = statement1.executeQuery();
+            int userId = -1;
+            while (rs.next()) {
+                userId = rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            log.error("Exception qhile querying db",e);
+            return -1;
+        }
+
+
+        return userId;
     }
 
     public PaymentRequestResponseMeta getUsersInVicinity(PaymentRequest request) throws SQLException {
