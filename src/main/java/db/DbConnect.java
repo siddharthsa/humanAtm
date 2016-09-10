@@ -126,7 +126,7 @@ public class DbConnect {
         }
 
         //Get id of this payment_requests
-        String lastRequestQuery = "select * from payment_requests where requester_id = " + request.getUserId() + "order by requested_time desc limit 1";
+        String lastRequestQuery = "select * from payment_requests where requester_id = " + request.getUserId() + " order by requested_time desc limit 1";
         PreparedStatement statement1 = getConnection().prepareStatement(lastRequestQuery);
         ResultSet rs = statement1.executeQuery();
         int paymentRequestId = -1;
