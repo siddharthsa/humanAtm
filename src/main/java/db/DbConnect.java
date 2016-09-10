@@ -10,6 +10,15 @@ import java.sql.SQLException;
 /**
  * Created by siddharth on 9/10/16.
  */
+/*
+Schema:
+CREATE TABLE Users(id int NOT NULL AUTO_INCREMENT,username varchar(255),phonenumber bigint NOT NULL,email varchar(255),password varchar(255),gcmId varchar(255),status varchar(255),created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY (id));
+
+CREATE TABLE payment_requests(id int NOT NULL AUTO_INCREMENT,requester_id int NOT NULL,amount int NOT NULL,requested_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,status varchar(255),fulfilled_by int NOT NULL, PRIMARY KEY (id));
+
+CREATE TABLE last_location(user_id int NOT NULL PRIMARY KEY, lat DOUBLE, lon DOUBLE);
+
+ */
 public class DbConnect {
 
     private static final BasicDataSource dataSource = new BasicDataSource();
