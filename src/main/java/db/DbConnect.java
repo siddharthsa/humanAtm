@@ -33,7 +33,7 @@ public class DbConnect {
     private static final BasicDataSource dataSource = new BasicDataSource();
     private static String host;
 
-    private final String HARD_CODED_GCM = "dlUPtOZxbUw:APA91bFnwaiL1-p88u-jLPtpkvlPiZX9fX92GtFmYNz1os55hrWRgv5Ac5QzxM_LDib6VaguwXJWFP4CsT5T9Ix7ZfJihXK2nILnx_RuiCqJyuPTsyOWiVqwQN8n3NuLrXyMuX0S612h";
+    private final String HARD_CODED_GCM = "fi2KKGLUyLM:APA91bHH3DmX84TM5JmwG0SEeWGIRBBW2AhqrQ7bH9Nj7HTiB71PR5fC8uDJYeaJnW92HSk5vTNcdbh5bd7it26m4UeOpZP7SkyR1MvYH8q4_H_FzCU7p_lw3kkmqJiEeCpiJiHlaUTn";
 
     static {
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
@@ -94,7 +94,7 @@ public class DbConnect {
                 userId = rs.getInt("id");
             }
         } catch (SQLException e) {
-            log.error("Exception qhile querying db",e);
+            log.error("Exception while querying db",e);
             return -1;
         }
 
@@ -158,7 +158,7 @@ public class DbConnect {
 
         //TODO - hack : remove it
 
-        if (resultantIds.length == 0) {
+        if (iter == 0) {
             resultantIds[0] = HARD_CODED_GCM;
         }
 
