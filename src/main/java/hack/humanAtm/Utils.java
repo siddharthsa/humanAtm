@@ -83,6 +83,25 @@ public class Utils {
     }
 
     public static boolean acknowledgeTransaction(DbConnect db, TransactionPOJO transactionPOJO) {
-        return db.processTransactionSuccess(transactionPOJO.getTransactionId());
+        PaymentSuccessMeta psm = db.processTransactionSuccess(transactionPOJO.getTransactionId());
+
+        try {
+            //TODO - get name from db for this request
+            sendSuccessNotifications(psm.getGcmId(), psm.getAmount());
+        } catch (IOException e) {
+            log.error("Can't send gcm msg", e);
+            return false;
+        }
+        return true;
+    }
+
+    private static void sendSuccessNotifications(String gcmId, int amount) throws IOException {
+        String message = "{ \"data\": {\n" +
+                "    \"type\": \"" + "success" + "\"\n" +
+                "    \"amount\": \"" + amount + "\"\n" +
+                "  },\n" +
+                "  \"to\" : \"" + gcmId + "\"\n" +
+                "}";
+        makeHTTPRequest(message);
     }
 }

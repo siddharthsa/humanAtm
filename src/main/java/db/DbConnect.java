@@ -1,11 +1,6 @@
 package db;
 
-import POJO.AgreePaymentRequest;
-import POJO.FulfillerMetaData;
-import POJO.PaymentRequest;
-import POJO.PaymentRequestResponseMeta;
-import POJO.User;
-import POJO.UserIdPOJO;
+import POJO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -252,7 +247,7 @@ public class DbConnect {
 
     }
 
-    public boolean processTransactionSuccess(int transactionId) {
+    public PaymentSuccessMeta processTransactionSuccess(int transactionId) {
         String updateSQL = "update table payment_requests set status = 'done' where id = " + transactionId;
 
         PreparedStatement statement;
@@ -267,7 +262,7 @@ public class DbConnect {
 
 
         if (result != 1) {
-            return false;
+            return null;
         }
 
         // get fulfiller id, amount and borrowner name
@@ -292,7 +287,28 @@ public class DbConnect {
             log.error("Exception while querying DB", e);
         }
 
-        return true;
+        // get gcmId of fulfiller
+
+        String gcmQuery = "select *  from users where id = " + fulfillerId;
+        PreparedStatement statement2 = null;
+        try {
+            statement2 = getConnection().prepareStatement(gcmQuery);
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+        ResultSet rs1 = null;
+        String gcmId = null;
+        try {
+            rs1 = statement2.executeQuery();
+
+            while (rs1.next()) {
+                gcmId = rs.getString("gcmId");
+            }
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+        return new PaymentSuccessMeta(gcmId,amount);
 
 
         // send gcm confirmation to provider
