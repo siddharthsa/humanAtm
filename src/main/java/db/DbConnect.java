@@ -65,7 +65,7 @@ public class DbConnect {
                 + ",77.594563"
                 + ")";
 
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         int result = 0;
         try {
             statement = getConnection().prepareStatement(insertSQL);
@@ -73,30 +73,75 @@ public class DbConnect {
 
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
-        if (result != 1) {
-            return -1;
-        }
 
-        String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + " order by created_on desc";
-        int userId = -1;
+
+    if(result!=1)
+
+    {
+        return -1;
+    }
+
+    String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + " order by created_on desc";
+    int userId = -1;
+    try
+
+    {
+        PreparedStatement statement1 = getConnection().prepareStatement(userIdSQL);
+        ResultSet rs = statement1.executeQuery();
+
+        while (rs.next()) {
+            userId = rs.getInt("id");
+        }
+    }
+
+    catch(SQLException e){
+        log.error("Exception while querying db", e);
+        return -1;
+    }
+    finally {
         try {
-            PreparedStatement statement1 = getConnection().prepareStatement(userIdSQL);
-            ResultSet rs = statement1.executeQuery();
+            if (!statement.isClosed()) {
 
-            while (rs.next()) {
-                userId = rs.getInt("id");
+                statement.close();
             }
         } catch (SQLException e) {
-            log.error("Exception while querying db",e);
-            return -1;
+            e.printStackTrace();
         }
 
+        try {
+            if (!getConnection().isClosed()) {
 
-        return userId;
+                getConnection().close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
+
+    return userId;
+}
 
     public PaymentRequestResponseMeta getUsersInVicinity(PaymentRequest request) throws SQLException {
 
@@ -107,7 +152,7 @@ public class DbConnect {
                 + request.getAmount()
                 + ",'pending')";
 
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         int result = 0;
         try {
             statement = getConnection().prepareStatement(insertSQL);
@@ -115,6 +160,24 @@ public class DbConnect {
 
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         if (result != 1) {
@@ -123,12 +186,37 @@ public class DbConnect {
 
         //Get id of this payment_requests
         String lastRequestQuery = "select * from payment_requests where requester_id = " + request.getUserId() + " order by requested_time desc limit 1";
-        PreparedStatement statement1 = getConnection().prepareStatement(lastRequestQuery);
-        ResultSet rs = statement1.executeQuery();
+        PreparedStatement statement1 = null;
         int paymentRequestId = -1;
-        while (rs.next()) {
-            paymentRequestId = rs.getInt("id");
+        try {
+            statement1 = getConnection().prepareStatement(lastRequestQuery);
+            ResultSet rs = statement1.executeQuery();
+
+            while (rs.next()) {
+                paymentRequestId = rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
 
         //Get all eligible users
 
@@ -136,22 +224,46 @@ public class DbConnect {
 
         int iter = 0;
         String allUsersQuery = "select * from Users";
-        PreparedStatement statement2 = getConnection().prepareStatement(allUsersQuery);
-        ResultSet rs1 = statement2.executeQuery();
-        while (rs1.next()) {
-            int userId = rs1.getInt("id");
-            // do not send notification to yourself
-            if (userId != request.getUserId()) {
-                String gcmId = rs1.getString("gcmId");
-                double lat = rs1.getDouble("lat");
-                double lon = rs1.getDouble("lon");
+        PreparedStatement statement2 = null;
+        try {
+            statement2 = getConnection().prepareStatement(allUsersQuery);
+            ResultSet rs1 = statement2.executeQuery();
+            while (rs1.next()) {
+                int userId = rs1.getInt("id");
+                // do not send notification to yourself
+                if (userId != request.getUserId()) {
+                    String gcmId = rs1.getString("gcmId");
+                    double lat = rs1.getDouble("lat");
+                    double lon = rs1.getDouble("lon");
 
-                if (euclideanDistance(request, lat, lon) < request.getDistanceMeters() && iter < 1000) {
-                    resultantIds.add(gcmId);
-                    iter++;
+                    if (euclideanDistance(request, lat, lon) < request.getDistanceMeters() && iter < 1000) {
+                        resultantIds.add(gcmId);
+                        iter++;
+                    }
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
 
         //TODO - hack : remove it
 
@@ -174,7 +286,7 @@ public class DbConnect {
     public boolean updateTransationFulfillers(AgreePaymentRequest request) {
         String updateSQL = "update payment_requests set fulfilled_by = " + request.getUserId() + " where id = " + request.getPaymentId();
 
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         int result = 0;
         try {
             statement = getConnection().prepareStatement(updateSQL);
@@ -182,6 +294,24 @@ public class DbConnect {
 
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -209,6 +339,24 @@ public class DbConnect {
             }
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement1.isClosed()) {
+
+                    statement1.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -239,10 +387,27 @@ public class DbConnect {
             }
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return ffmd;
-
 
 
     }
@@ -250,7 +415,7 @@ public class DbConnect {
     public PaymentSuccessMeta processTransactionSuccess(int transactionId) {
         String updateSQL = "update payment_requests set status = 'done' where id = " + transactionId;
 
-        PreparedStatement statement;
+        PreparedStatement statement = null;
         int result = 0;
         try {
             statement = getConnection().prepareStatement(updateSQL);
@@ -258,6 +423,24 @@ public class DbConnect {
 
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -273,6 +456,24 @@ public class DbConnect {
             statement1 = getConnection().prepareStatement(lastRequestQuery);
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         ResultSet rs = null;
         int fulfillerId = -1;
@@ -285,6 +486,24 @@ public class DbConnect {
             }
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         // get gcmId of fulfiller
@@ -306,9 +525,27 @@ public class DbConnect {
             }
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
+        } finally {
+            try {
+                if (!statement.isClosed()) {
+
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                if (!getConnection().isClosed()) {
+
+                    getConnection().close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
-        return new PaymentSuccessMeta(gcmId,amount);
+        return new PaymentSuccessMeta(gcmId, amount);
 
 
         // send gcm confirmation to provider
