@@ -85,11 +85,11 @@ public class DbConnect {
         }
 
         String userIdSQL = "select id from Users where phonenumber = " + user.getPhoneNumber() + "order by created_on desc";
-
+        int userId = -1;
         try {
             PreparedStatement statement1 = getConnection().prepareStatement(userIdSQL);
             ResultSet rs = statement1.executeQuery();
-            int userId = -1;
+
             while (rs.next()) {
                 userId = rs.getInt("id");
             }
