@@ -172,7 +172,7 @@ public class DbConnect {
     }
 
     public boolean updateTransationFulfillers(AgreePaymentRequest request) {
-        String updateSQL = "update table payment_requests set fulfilled_by = " + request.getUserId() + " where id = " + request.getPaymentId();
+        String updateSQL = "update payment_requests set fulfilled_by = " + request.getUserId() + " where id = " + request.getPaymentId();
 
         PreparedStatement statement;
         int result = 0;
@@ -248,7 +248,7 @@ public class DbConnect {
     }
 
     public PaymentSuccessMeta processTransactionSuccess(int transactionId) {
-        String updateSQL = "update table payment_requests set status = 'done' where id = " + transactionId;
+        String updateSQL = "update payment_requests set status = 'done' where id = " + transactionId;
 
         PreparedStatement statement;
         int result = 0;
