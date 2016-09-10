@@ -1,6 +1,11 @@
 package db;
 
-import POJO.*;
+import POJO.AgreePaymentRequest;
+import POJO.FulfillerMetaData;
+import POJO.PaymentRequest;
+import POJO.PaymentRequestResponseMeta;
+import POJO.User;
+import POJO.UserIdPOJO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 
