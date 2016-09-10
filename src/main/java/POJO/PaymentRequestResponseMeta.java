@@ -9,6 +9,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class PaymentRequestResponseMeta {
 
+    public PaymentRequestResponseMeta(){}
     private int paymentRequestId;
     private ArrayList<String> resultantIds;
 }

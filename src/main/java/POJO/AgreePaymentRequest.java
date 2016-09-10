@@ -8,6 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class AgreePaymentRequest {
 
+    public AgreePaymentRequest(){}
     private int userId;
     private int paymentId;
 }

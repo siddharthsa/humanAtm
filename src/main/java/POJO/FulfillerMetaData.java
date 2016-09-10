@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class FulfillerMetaData {
+
+    public FulfillerMetaData(){}
     private int userId;
     private String name;
     private double distance;
