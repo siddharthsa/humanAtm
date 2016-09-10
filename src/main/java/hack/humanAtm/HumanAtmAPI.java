@@ -89,7 +89,7 @@ public class HumanAtmAPI {
     @Timed
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/dummy")
-    public void acknowledgeTransaction(String dummyInput) {
+    public void dummy(String dummyInput) {
     }
 
 

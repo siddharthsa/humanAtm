@@ -205,7 +205,7 @@ public class DbConnect {
         try {
             rs = statement1.executeQuery();
             while (rs.next()) {
-                fulfillerId = rs.getInt("id");
+                fulfillerId = rs.getInt("fulfilled_by");
             }
         } catch (SQLException e) {
             log.error("Exception while querying DB", e);
