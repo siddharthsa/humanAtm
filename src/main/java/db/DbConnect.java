@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by siddharth on 9/10/16.
@@ -136,7 +137,8 @@ public class DbConnect {
 
         //Get all eligible users
 
-        String resultantIds[] = new String[1000];
+        ArrayList<String> resultantIds = new ArrayList<>(10);
+
         int iter = 0;
         String allUsersQuery = "select * from Users";
         PreparedStatement statement2 = getConnection().prepareStatement(allUsersQuery);
@@ -150,7 +152,7 @@ public class DbConnect {
                 double lon = rs1.getDouble("lon");
 
                 if (euclideanDistance(request, lat, lon) < request.getDistanceMeters() && iter < 1000) {
-                    resultantIds[iter] = gcmId;
+                    resultantIds.add(gcmId);
                     iter++;
                 }
             }
@@ -158,8 +160,9 @@ public class DbConnect {
 
         //TODO - hack : remove it
 
+
         if (iter == 0) {
-            resultantIds[0] = HARD_CODED_GCM;
+            resultantIds.add(HARD_CODED_GCM);
         }
 
         return new PaymentRequestResponseMeta(paymentRequestId, resultantIds);

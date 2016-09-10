@@ -10,6 +10,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by siddharth on 9/10/16.
@@ -39,7 +40,7 @@ public class Utils {
         return true;
     }
 
-    private static void sendBorrowRequestNotifications(String[] eligibleUsers, int requestId, String name, int amount) throws IOException {
+    private static void sendBorrowRequestNotifications(ArrayList<String> eligibleUsers, int requestId, String name, int amount) throws IOException {
         for (String gcm : eligibleUsers) {
             String message = "{ \"data\": {\n" +
                     "    \"requestId\": \"" + requestId + "\",\n" +
@@ -53,6 +54,9 @@ public class Utils {
     }
 
     private static boolean makeHTTPRequest(String message) throws IOException {
+
+
+
 
         String url = "https://fcm.googleapis.com/fcm/send";
 
