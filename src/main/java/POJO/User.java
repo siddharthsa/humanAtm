@@ -1,6 +1,5 @@
-package entities;
+package POJO;
 
-import io.dropwizard.jersey.params.LongParam;
 import lombok.Data;
 
 /**

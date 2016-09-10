@@ -1,10 +1,12 @@
 package db;
 
-import entities.User;
+import POJO.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -16,13 +18,17 @@ CREATE TABLE Users(id int NOT NULL AUTO_INCREMENT,username varchar(255),phonenum
 
 CREATE TABLE payment_requests(id int NOT NULL AUTO_INCREMENT,requester_id int NOT NULL,amount int NOT NULL,requested_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,status varchar(255),fulfilled_by int NOT NULL, PRIMARY KEY (id));
 
-CREATE TABLE last_location(user_id int NOT NULL PRIMARY KEY, lat DOUBLE, lon DOUBLE);
+ alter table Users add lat DOUBLE;
+  alter table Users add lon DOUBLE;
 
  */
+@Slf4j
 public class DbConnect {
 
     private static final BasicDataSource dataSource = new BasicDataSource();
     private static String host;
+
+    private final String HARD_CODED_GCM = "dlUPtOZxbUw:APA91bFnwaiL1-p88u-jLPtpkvlPiZX9fX92GtFmYNz1os55hrWRgv5Ac5QzxM_LDib6VaguwXJWFP4CsT5T9Ix7ZfJihXK2nILnx_RuiCqJyuPTsyOWiVqwQN8n3NuLrXyMuX0S612h";
 
     static {
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
@@ -42,18 +48,183 @@ public class DbConnect {
     }
 
 
-    public boolean writeNewUserToDB(User user) throws SQLException {
-        String insertSQL = "insert into Users (username,phonenumber,email,password,gcmId,status) values ('" + user.getUsername() + "'," + user.getPhoneNumber() + ",'" +
+    public boolean writeNewUserToDB(User user) {
+        String insertSQL = "insert into Users (username,phonenumber,email,password,gcmId,status,lat,lon) values ('"
+                + user.getUsername()
+                + "',"
+                + user.getPhoneNumber()
+                + ",'" +
                 user.getEmail()
-                + "','" + user.getPassword() + "','" + user.getGcmId() + "','pending')";
+                + "','"
+                + user.getPassword()
+                + "','"
+                + user.getGcmId()
+                + "','pending',"
+                + "12.971599"
+                + ",77.594563"
+                + ")";
 
-        PreparedStatement statement = getConnection().prepareStatement(insertSQL);
+        PreparedStatement statement;
+        int result = 0;
+        try {
+            statement = getConnection().prepareStatement(insertSQL);
+            result = statement.executeUpdate();
 
-        int result = statement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
 
         if (result == 1) {
             return true;
         }
         return false;
+    }
+
+    public PaymentRequestResponseMeta getUsersInVicinity(PaymentRequest request) throws SQLException {
+
+        //Insert into payment_requests
+        String insertSQL = "insert into payment_requests (requester_id,amount,status) values ('"
+                + request.getUserId()
+                + "',"
+                + request.getAmount()
+                + ",'pending')";
+
+        PreparedStatement statement;
+        int result = 0;
+        try {
+            statement = getConnection().prepareStatement(insertSQL);
+            result = statement.executeUpdate();
+
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+        if (result != 1) {
+            throw new SQLException("Failed to insert record");
+        }
+
+        //Get id of this payment_requests
+        String lastRequestQuery = "select * from payment_requests where requester_id = " + request.getUserId() + "order by requested_time desc limit 1";
+        PreparedStatement statement1 = getConnection().prepareStatement(lastRequestQuery);
+        ResultSet rs = statement1.executeQuery();
+        int paymentRequestId = -1;
+        while (rs.next()) {
+            paymentRequestId = rs.getInt("id");
+        }
+
+        //Get all eligible users
+
+        String resultantIds[] = new String[1000];
+        int iter = 0;
+        String allUsersQuery = "select * from Users";
+        PreparedStatement statement2 = getConnection().prepareStatement(allUsersQuery);
+        ResultSet rs1 = statement2.executeQuery();
+        while (rs1.next()) {
+            int userId = rs1.getInt("id");
+            // do not send notification to yourself
+            if (userId != request.getUserId()) {
+                String gcmId = rs1.getString("gcmId");
+                double lat = rs1.getDouble("lat");
+                double lon = rs1.getDouble("lon");
+
+                if (euclideanDistance(request, lat, lon) < request.getDistanceMeters() && iter < 1000) {
+                    resultantIds[iter] = gcmId;
+                    iter++;
+                }
+            }
+        }
+
+        //TODO - hack : remove it
+
+        if (resultantIds.length == 0) {
+            resultantIds[0] = HARD_CODED_GCM;
+        }
+
+        return new PaymentRequestResponseMeta(paymentRequestId, resultantIds);
+    }
+
+    private double euclideanDistance(PaymentRequest request, double lat, double lon) {
+        double latDist = Math.abs(lat - request.getLat());
+        double lonDist = Math.abs(lon - request.getLon());
+
+        return Math.sqrt(latDist * latDist + lonDist * lonDist);
+
+    }
+
+    public boolean updateTransationFulfillers(AgreePaymentRequest request) {
+        String updateSQL = "update table payment_requests set fulfilled_by = " + request.getUserId() + " where id = " + request.getPaymentId();
+
+        PreparedStatement statement;
+        int result = 0;
+        try {
+            statement = getConnection().prepareStatement(updateSQL);
+            result = statement.executeUpdate();
+
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+
+        if (result == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public FulfillerMetaData getFulfillerMeta(UserIdPOJO user) {
+        //Get id of this payment_requests
+        String lastRequestQuery = "select fulfilled_by from payment_requests where requester_id = " + user.getUserId() + "order by requested_time desc limit 1";
+        PreparedStatement statement1 = null;
+        try {
+            statement1 = getConnection().prepareStatement(lastRequestQuery);
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+        ResultSet rs = null;
+        int fulfillerId = -1;
+        try {
+            rs = statement1.executeQuery();
+            while (rs.next()) {
+                fulfillerId = rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+
+        if (fulfillerId == -1) {
+            return null;
+        }
+
+        String userQuery = "select * from Users where id = " + fulfillerId;
+
+        FulfillerMetaData ffmd = null;
+
+        PreparedStatement statement = null;
+        try {
+            statement = getConnection().prepareStatement(userQuery);
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+        ResultSet rs1 = null;
+        try {
+            rs1 = statement.executeQuery();
+            while (rs1.next()) {
+
+                ffmd = new FulfillerMetaData(rs1.getInt("id"),
+                        rs1.getString("name"),
+                        100,
+                        rs1.getDouble("lat"),
+                        rs1.getDouble("lon"));
+            }
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+        return ffmd;
+
+
+
     }
 }

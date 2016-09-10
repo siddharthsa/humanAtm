@@ -1,8 +1,8 @@
 package hack.humanAtm;
 
+import POJO.*;
 import com.codahale.metrics.annotation.Timed;
 import db.DbConnect;
-import entities.User;
 import io.dropwizard.jersey.params.LongParam;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,14 +28,6 @@ public class HumanAtmAPI {
     @Timed
     @Path("/registerUser")
     public String registerUser(User user) {
-//        User user = User.builder()
-//                .username(username)
-//                .phoneNumber(phoneNumber)
-//                .email(email)
-//                .password(password)
-//                .gcmId(gcmId)
-//                .upi(upi)
-//                .build();
         if (Utils.registerUser(db, user)) {
             return "Registration Successful";
         } else {
@@ -46,12 +38,35 @@ public class HumanAtmAPI {
     @POST
     @Timed
     @Path("/requestPayment")
-    public String registerUser(@NotNull @PathParam("userId") LongParam userId,
-                               @NotNull @PathParam("amount") LongParam amount,
-                               @NotNull @PathParam("lat") double lat,
-                               @NotNull @PathParam("lon") double lon) {
-        return "Payment request successful";
+    public String registerUser(PaymentRequest request) {
+        if (Utils.processPaymentRequest(db, request)) {
+            return "Payment Request Accepted";
+        } else {
+            return "Payment Request Failed";
+        }
     }
+
+
+    @POST
+    @Timed
+    @Path("/agreePayment")
+    public String registerUser(AgreePaymentRequest request) {
+        if (Utils.processAgreePaymentRequest(db, request)) {
+            return "Agree Payment Request Accepted";
+        } else {
+            return "Agree Payment Request Failed";
+        }
+    }
+
+
+    @POST
+    @Timed
+    @Path("/getAllFulfillers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public FulfillerMetaData getAllFulfillers(UserIdPOJO user) {
+        return Utils.getAllFulfillersMetaOfPayment(db, user);
+    }
+
 
     @POST
     @Timed
