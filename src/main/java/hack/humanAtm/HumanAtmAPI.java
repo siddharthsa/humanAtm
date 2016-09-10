@@ -38,7 +38,7 @@ public class HumanAtmAPI {
     @POST
     @Timed
     @Path("/requestPayment")
-    public String registerUser(PaymentRequest request) {
+    public String requestPaymentAPI(PaymentRequest request) {
         if (Utils.processPaymentRequest(db, request)) {
             return "Payment Request Accepted";
         } else {
@@ -50,7 +50,7 @@ public class HumanAtmAPI {
     @POST
     @Timed
     @Path("/agreePayment")
-    public String registerUser(AgreePaymentRequest request) {
+    public String agreePaymentAPI(AgreePaymentRequest request) {
         if (Utils.processAgreePaymentRequest(db, request)) {
             return "Agree Payment Request Accepted";
         } else {
@@ -73,7 +73,7 @@ public class HumanAtmAPI {
     @POST
     @Timed
     @Path("/updateLocation")
-    public String registerUser(@NotNull @PathParam("userId") LongParam userId,
+    public String updateLocationAPI(@NotNull @PathParam("userId") LongParam userId,
                                @NotNull @PathParam("lat") double lat,
                                @NotNull @PathParam("lon") double lon) {
         return "Update location successful";
