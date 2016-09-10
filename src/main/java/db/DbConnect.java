@@ -251,4 +251,50 @@ public class DbConnect {
 
 
     }
+
+    public boolean processTransactionSuccess(int transactionId) {
+        String updateSQL = "update table payment_requests set status = 'done' where id = " + transactionId;
+
+        PreparedStatement statement;
+        int result = 0;
+        try {
+            statement = getConnection().prepareStatement(updateSQL);
+            result = statement.executeUpdate();
+
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+
+        if (result != 1) {
+            return false;
+        }
+
+        // get fulfiller id, amount and borrowner name
+
+        String lastRequestQuery = "select *  from payment_requests where id = " + transactionId;
+        PreparedStatement statement1 = null;
+        try {
+            statement1 = getConnection().prepareStatement(lastRequestQuery);
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+        ResultSet rs = null;
+        int fulfillerId = -1;
+        int amount = -1;
+        try {
+            rs = statement1.executeQuery();
+            while (rs.next()) {
+                fulfillerId = rs.getInt("fulfilled_by");
+                amount = rs.getInt("amount");
+            }
+        } catch (SQLException e) {
+            log.error("Exception while querying DB", e);
+        }
+
+        return true;
+
+
+        // send gcm confirmation to provider
+    }
 }

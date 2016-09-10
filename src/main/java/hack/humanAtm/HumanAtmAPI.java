@@ -67,10 +67,28 @@ public class HumanAtmAPI {
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<FulfillerMetaData> getAllFulfillers(UserIdPOJO user) {
 
-        //TODO - make array
         ArrayList<FulfillerMetaData> returnVal = new ArrayList<>();
         returnVal.add(Utils.getAllFulfillersMetaOfPayment(db, user));
         return returnVal;
+    }
+
+
+    @POST
+    @Timed
+    @Path("/ackTransactionSuccess")
+    public String acknowledgeTransaction(TransactionPOJO transactionPOJO) {
+
+        if (Utils.acknowledgeTransaction(db, transactionPOJO)) {
+            return "Payment Request Accepted";
+        } else {
+            return "Payment Request Failed";
+        }
+    }
+
+    @POST
+    @Timed
+    @Path("/dummy")
+    public void acknowledgeTransaction(String dummyInput) {
     }
 
 

@@ -56,10 +56,7 @@ public class Utils {
     private static boolean makeHTTPRequest(String message) throws IOException {
 
 
-
-
         String url = "https://fcm.googleapis.com/fcm/send";
-
 
         DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpPost httpRequest = new HttpPost(url);
@@ -83,5 +80,9 @@ public class Utils {
 
     public static FulfillerMetaData getAllFulfillersMetaOfPayment(DbConnect db, UserIdPOJO user) {
         return db.getFulfillerMeta(user);
+    }
+
+    public static boolean acknowledgeTransaction(DbConnect db, TransactionPOJO transactionPOJO) {
+        return db.processTransactionSuccess(transactionPOJO.getTransactionId());
     }
 }
