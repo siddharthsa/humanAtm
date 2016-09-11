@@ -76,12 +76,13 @@ public class HumanAtmAPI {
     @POST
     @Timed
     @Path("/ackTransactionSuccess")
-    public String acknowledgeTransaction(TransactionPOJO transactionPOJO) {
+    @Produces(MediaType.APPLICATION_JSON)
+    public TransactionPOJO acknowledgeTransaction(TransactionPOJO transactionPOJO) {
 
         if (Utils.acknowledgeTransaction(db, transactionPOJO)) {
-            return "Payment Request Accepted";
+            return transactionPOJO;
         } else {
-            return "Payment Request Failed";
+            return null;
         }
     }
 

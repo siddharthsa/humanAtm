@@ -4,6 +4,9 @@ import POJO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +29,7 @@ CREATE TABLE payment_requests(id int NOT NULL AUTO_INCREMENT,requester_id int NO
 @Slf4j
 public class DbConnect {
 
-    private static final BasicDataSource dataSource = new BasicDataSource();
+   private static final BasicDataSource dataSource = new BasicDataSource();
     private static String host;
 
     private final String HARD_CODED_GCM = "fi2KKGLUyLM:APA91bHH3DmX84TM5JmwG0SEeWGIRBBW2AhqrQ7bH9Nj7HTiB71PR5fC8uDJYeaJnW92HSk5vTNcdbh5bd7it26m4UeOpZP7SkyR1MvYH8q4_H_FzCU7p_lw3kkmqJiEeCpiJiHlaUTn";
@@ -37,11 +40,14 @@ public class DbConnect {
         dataSource.setUrl("jdbc:mysql://" + host + ":3306/atmApp");
         dataSource.setUsername("root");
         dataSource.setPassword("");
+        dataSource.setMaxActive(1000);
+        dataSource.setMaxWait(10000);
+        dataSource.setMaxIdle(1000);
     }
 
-    public DbConnect(String host) {
+    public DbConnect(String host) throws NamingException {
         this.host = host;
-        //
+
     }
 
     public static Connection getConnection() throws SQLException {
