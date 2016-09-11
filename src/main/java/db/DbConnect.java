@@ -365,7 +365,7 @@ public class DbConnect {
 //
         // get gcmId of fulfiller
 
-        String gcmQuery = "select *  from users where id = " + transactionPOJO.getFulfillerId();
+        String gcmQuery = "select *  from Users where id = " + transactionPOJO.getFulfillerId();
         PreparedStatement statement2 = null;
         ResultSet rs1 = null;
         String gcmId = null;
