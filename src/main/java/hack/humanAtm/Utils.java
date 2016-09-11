@@ -83,7 +83,7 @@ public class Utils {
     }
 
     public static boolean acknowledgeTransaction(DbConnect db, TransactionPOJO transactionPOJO) {
-        PaymentSuccessMeta psm = db.processTransactionSuccess(transactionPOJO.getTransactionId());
+        PaymentSuccessMeta psm = db.processTransactionSuccess(transactionPOJO);
 
         try {
             //TODO - get name from db for this request

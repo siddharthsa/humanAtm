@@ -265,14 +265,11 @@ public class DbConnect {
         //Get id of this payment_requests
         String lastRequestQuery = "select fulfilled_by from payment_requests where requester_id = " + user.getUserId() + " order by requested_time desc limit 1";
         PreparedStatement statement1 = null;
-        try {
-            statement1 = getConnection().prepareStatement(lastRequestQuery);
-        } catch (SQLException e) {
-            log.error("Exception while querying DB", e);
-        }
         ResultSet rs = null;
         int fulfillerId = -1;
+
         try {
+            statement1 = getConnection().prepareStatement(lastRequestQuery);
             rs = statement1.executeQuery();
             while (rs.next()) {
                 fulfillerId = rs.getInt("fulfilled_by");
@@ -334,63 +331,35 @@ public class DbConnect {
 
     }
 
-    public PaymentSuccessMeta processTransactionSuccess(int transactionId) {
-        String updateSQL = "update payment_requests set status = 'done' where id = " + transactionId;
-
-        PreparedStatement statement = null;
-        int result = 0;
-        try {
-            statement = getConnection().prepareStatement(updateSQL);
-            result = statement.executeUpdate();
-
-        } catch (SQLException e) {
-            log.error("Exception while querying DB", e);
-        } finally {
-            try {
-
-                statement.close();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        if (result != 1) {
-            return null;
-        }
-
-        // get fulfiller id, amount and borrowner name
-
-        String lastRequestQuery = "select *  from payment_requests where id = " + transactionId;
-        PreparedStatement statement1 = null;
-
-        ResultSet rs = null;
-        int fulfillerId = -1;
-        int amount = -1;
-        try {
-            statement1 = getConnection().prepareStatement(lastRequestQuery);
-            rs = statement1.executeQuery();
-            while (rs.next()) {
-                fulfillerId = rs.getInt("fulfilled_by");
-                amount = rs.getInt("amount");
-            }
-            rs.close();
-        } catch (SQLException e) {
-            log.error("Exception while querying DB", e);
-        } finally {
-            try {
-
-                statement.close();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
+    public PaymentSuccessMeta processTransactionSuccess(TransactionPOJO transactionPOJO) {
+//        String updateSQL = "update payment_requests set status = 'done' where id = " + transactionId;
+//
+//        PreparedStatement statement = null;
+//        int result = 0;
+//        try {
+//            statement = getConnection().prepareStatement(updateSQL);
+//            result = statement.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            log.error("Exception while querying DB", e);
+//        } finally {
+//            try {
+//
+//                statement.close();
+//
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//
+//        if (result != 1) {
+//            return null;
+//        }
+//
         // get gcmId of fulfiller
 
-        String gcmQuery = "select *  from users where id = " + fulfillerId;
+        String gcmQuery = "select *  from users where id = " + transactionPOJO.getFulfillerId();
         PreparedStatement statement2 = null;
         ResultSet rs1 = null;
         String gcmId = null;
@@ -399,7 +368,7 @@ public class DbConnect {
             rs1 = statement2.executeQuery();
 
             while (rs1.next()) {
-                gcmId = rs.getString("gcmId");
+                gcmId = rs1.getString("gcmId");
             }
             rs1.close();
         } catch (SQLException e) {
@@ -407,7 +376,7 @@ public class DbConnect {
         } finally {
             try {
 
-                statement.close();
+                statement2.close();
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -415,7 +384,7 @@ public class DbConnect {
 
         }
 
-        return new PaymentSuccessMeta(gcmId, amount);
+        return new PaymentSuccessMeta(gcmId, transactionPOJO.getAmount());
 
 
         // send gcm confirmation to provider

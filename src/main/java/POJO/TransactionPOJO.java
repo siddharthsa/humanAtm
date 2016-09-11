@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class TransactionPOJO {
     public TransactionPOJO(){}
-    private int transactionId;
+    private int fulfillerId;
+    private int amount;
 
 }
