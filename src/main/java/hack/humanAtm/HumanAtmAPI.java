@@ -30,11 +30,9 @@ public class HumanAtmAPI {
     @Path("/registerUser")
     @Produces(MediaType.APPLICATION_JSON)
     public UserIdPOJO registerUser(User user) {
-        if (Utils.registerUser(db, user) != -1) {
-            return new UserIdPOJO(Utils.registerUser(db, user));
-        } else {
-            return null;
-        }
+
+        return new UserIdPOJO(Utils.registerUser(db, user));
+
     }
 
     @POST
