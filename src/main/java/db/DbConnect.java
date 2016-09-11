@@ -107,6 +107,7 @@ public class DbConnect {
 
             while (rs.next()) {
                 userId = rs.getInt("id");
+                break;
             }
             rs.close();
         } catch (SQLException e) {
